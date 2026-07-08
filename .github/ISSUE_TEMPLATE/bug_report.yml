@@ -1,0 +1,99 @@
+name: Bug report
+description: Report something that is not working as expected in CodeSteward
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill out the
+        sections below so we can reproduce and fix the problem quickly.
+
+        Do **not** report security vulnerabilities here — see our
+        [security policy](../blob/main/SECURITY.md).
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: I am using a supported version (latest 0.1.x).
+          required: true
+        - label: This is not a security vulnerability (those go through the security policy).
+          required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: CodeSteward reported X, but I expected Y.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands or CI configuration used.
+      placeholder: |
+        1. Run `codesteward scan --base main --head HEAD`
+        2. Observe the report / error
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: The report, error message, or stderr output. Please redact any tokens.
+      render: shell
+    validations:
+      required: false
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where did this happen?
+      options:
+        - Local CLI
+        - GitHub Actions
+        - GitLab CI
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: CodeSteward version
+      description: Output of `codesteward version`.
+      placeholder: "codesteward 0.1.0 (commit ..., built ..., go1.24)"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and architecture
+      placeholder: "Linux amd64 / macOS arm64 / Windows amd64"
+    validations:
+      required: false
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant configuration
+      description: Your `.codesteward.yaml` (or the relevant portion) and CODEOWNERS, if applicable.
+      render: yaml
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help us understand the problem.
+    validations:
+      required: false
