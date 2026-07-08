@@ -1,0 +1,143 @@
+# CodeSteward GitHub composite action.
+#
+# CodeSteward is a deterministic, comment-only PR review-readiness bot. This
+# action downloads the release binary for the runner OS/arch, then runs
+# `codesteward scan`. In comment mode it posts (or updates in place) a single
+# PR comment marked with `<!-- codesteward-report -->` so repeated pushes never
+# create duplicate comments.
+#
+# Required workflow permissions:
+#   permissions:
+#     contents: read          # read the repository / diff
+#     pull-requests: write     # create or update the CodeSteward PR comment
+#
+# Checkout advice: CodeSteward diffs base...head, so the base branch history
+# must be present. Check out with full history:
+#   - uses: actions/checkout@v4
+#     with:
+#       fetch-depth: 0
+#
+# Example:
+#   name: CodeSteward
+#   on:
+#     pull_request:
+#       types: [opened, synchronize, edited, reopened]
+#   permissions:
+#     contents: read
+#     pull-requests: write
+#   jobs:
+#     codesteward:
+#       runs-on: ubuntu-latest
+#       steps:
+#         - uses: actions/checkout@v4
+#           with:
+#             fetch-depth: 0
+#         - uses: codesteward-ai/codesteward/actions/github@v0
+#           with:
+#             comment: true
+
+name: CodeSteward
+description: Deterministic, comment-only PR review-readiness checks for maintainers.
+author: CodeSteward
+
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  version:
+    description: CodeSteward release tag to download (e.g. v0.1.0).
+    required: false
+    default: v0.1.0
+  comment:
+    description: Post/update the CodeSteward comment on the pull request.
+    required: false
+    default: "true"
+  dry-run:
+    description: Log the intended comment action without calling the GitHub API.
+    required: false
+    default: "false"
+  format:
+    description: Report format for stdout output (markdown or json).
+    required: false
+    default: markdown
+  config:
+    description: Path to a .codesteward.yaml config file (optional).
+    required: false
+    default: ""
+  github-token:
+    description: "Token used to post the PR comment (needs pull-requests: write)."
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Download CodeSteward binary
+      shell: bash
+      env:
+        CS_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+
+        case "${RUNNER_OS}" in
+          Linux)   os=linux ;;
+          macOS)   os=darwin ;;
+          Windows) os=windows ;;
+          *) echo "CodeSteward: unsupported runner OS '${RUNNER_OS}'" >&2; exit 1 ;;
+        esac
+
+        case "${RUNNER_ARCH}" in
+          X64)   arch=amd64 ;;
+          ARM64) arch=arm64 ;;
+          *) echo "CodeSteward: unsupported runner arch '${RUNNER_ARCH}'" >&2; exit 1 ;;
+        esac
+
+        ext=""
+        if [ "${os}" = "windows" ]; then ext=".exe"; fi
+
+        asset="codesteward_${os}_${arch}${ext}"
+        url="https://github.com/codesteward-ai/codesteward/releases/download/${CS_VERSION}/${asset}"
+
+        dest="${RUNNER_TEMP}/codesteward${ext}"
+        echo "CodeSteward: downloading ${url}"
+        curl --fail --silent --show-error --location "${url}" --output "${dest}"
+        chmod +x "${dest}"
+        echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
+    - name: Run CodeSteward scan
+      shell: bash
+      env:
+        # Export the token so `codesteward scan --comment` can post via the
+        # GitHub API (GITHUB_TOKEN is not exposed to steps automatically).
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        CS_COMMENT: ${{ inputs.comment }}
+        CS_DRY_RUN: ${{ inputs['dry-run'] }}
+        CS_FORMAT: ${{ inputs.format }}
+        CS_CONFIG: ${{ inputs.config }}
+      run: |
+        set -euo pipefail
+
+        args=(scan)
+
+        # Base/head refs come from the pull_request event.
+        if [ -n "${GITHUB_BASE_REF:-}" ]; then
+          args+=(--base "${GITHUB_BASE_REF}")
+        fi
+        args+=(--head "${GITHUB_HEAD_REF:-HEAD}")
+
+        if [ -n "${CS_FORMAT}" ]; then
+          args+=(--format "${CS_FORMAT}")
+        fi
+        if [ -n "${CS_CONFIG}" ]; then
+          args+=(--config "${CS_CONFIG}")
+        fi
+        if [ "${CS_COMMENT}" = "true" ]; then
+          args+=(--comment)
+        fi
+        if [ "${CS_DRY_RUN}" = "true" ]; then
+          args+=(--dry-run)
+        fi
+
+        echo "CodeSteward: running codesteward ${args[*]}"
+        codesteward "${args[@]}"
