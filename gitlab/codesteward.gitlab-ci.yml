@@ -1,0 +1,73 @@
+# CodeSteward GitLab CI template
+# =============================================================================
+# CodeSteward is a deterministic, comment-only PR/MR review-readiness bot. On
+# every merge request pipeline it leaves ONE compact note summarizing ownership,
+# test coverage expectations, scope, and description quality. It never blocks,
+# labels, or assigns reviewers.
+#
+# Usage
+# -----
+# Include this template in your project's .gitlab-ci.yml:
+#
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/codesteward-ai/codesteward/v0.1.0/gitlab/codesteward.gitlab-ci.yml'
+#
+# or copy this file into your repository and:
+#
+#   include:
+#     - local: 'gitlab/codesteward.gitlab-ci.yml'
+#
+# Token setup (required to post the MR note)
+# ------------------------------------------
+# The default CI job token (CI_JOB_TOKEN) usually CANNOT post merge request
+# notes. Create a Project Access Token (Settings > Access Tokens) or a Personal
+# Access Token with the 'api' scope and the Developer role or higher, then add
+# it as a masked CI/CD variable named CODESTEWARD_GITLAB_TOKEN
+# (Settings > CI/CD > Variables). CodeSteward prefers CODESTEWARD_GITLAB_TOKEN
+# and falls back to CI_JOB_TOKEN; if only the job token is available, posting
+# will fail with a 401/403 explaining the token requirement.
+#
+# Variants
+# --------
+# * Comment mode (default below): posts/updates the MR note via `--comment`.
+# * Output-only mode: drop `--comment` to print the Markdown report to the job
+#   log without touching the MR (no token required). See `codesteward:output`.
+# * Dry-run mode: keep `--comment --dry-run` to log the intended action while
+#   making zero GitLab API calls. See `codesteward:dry-run`.
+# =============================================================================
+
+codesteward:
+  image: ghcr.io/codesteward-ai/codesteward:v0.1.0
+  variables:
+    # Full history so CodeSteward can diff against the merge request target.
+    GIT_DEPTH: 0
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - codesteward scan --comment
+
+# ---------------------------------------------------------------------------
+# Output-only variant: prints the report to the job log, posts nothing, and
+# needs no token. Uncomment to use instead of (or alongside) the job above.
+# ---------------------------------------------------------------------------
+# codesteward:output:
+#   image: ghcr.io/codesteward-ai/codesteward:v0.1.0
+#   variables:
+#     GIT_DEPTH: 0
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#   script:
+#     - codesteward scan --format markdown
+
+# ---------------------------------------------------------------------------
+# Dry-run variant: logs the intended note action but makes no GitLab API calls.
+# Useful for verifying setup before granting a posting token.
+# ---------------------------------------------------------------------------
+# codesteward:dry-run:
+#   image: ghcr.io/codesteward-ai/codesteward:v0.1.0
+#   variables:
+#     GIT_DEPTH: 0
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#   script:
+#     - codesteward scan --comment --dry-run
