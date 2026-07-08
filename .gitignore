@@ -1,0 +1,8 @@
+# Build output
+/bin/
+/dist/
+
+# Coverage files
+*.out
+coverage.txt
+coverage.html
