@@ -1,0 +1,17 @@
+# Overrides a subset of keys; absent keys must keep their defaults.
+project:
+  name: my-package
+
+mode:
+  comment_only: false
+
+review_readiness:
+  max_files_changed: 25
+
+ownership:
+  production_paths:
+    - app/**
+    - internal/**
+
+pr_description:
+  min_length: 120

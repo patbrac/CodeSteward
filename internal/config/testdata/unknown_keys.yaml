@@ -1,0 +1,10 @@
+# Contains one unknown top-level key and one unknown nested key.
+mystery: 42
+
+ownership:
+  use_codeowners: false
+  bogus_nested: hello
+
+tests:
+  require_for:
+    - src/**

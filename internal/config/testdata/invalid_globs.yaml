@@ -1,0 +1,8 @@
+# Contains invalid glob patterns that must produce warnings, not errors.
+ownership:
+  production_paths:
+    - src/**
+    - "a[b"
+sensitive_paths:
+  - package.json
+  - "["
