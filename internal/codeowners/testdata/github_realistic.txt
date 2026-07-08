@@ -1,0 +1,20 @@
+# Realistic GitHub CODEOWNERS.
+# The catch-all comes first so more specific rules below win (last-match-wins).
+
+* @acme/maintainers
+
+# Ownership by source area.
+/src/parser/ @acme/parser-team @alice
+/src/public/ @api-team
+
+# Documentation.
+/docs/ @docs-team
+
+# A very specific rule that overrides the parser directory rule.
+/src/parser/tokenize.ts @tokenizer-guru
+
+# Extension-based rule (slashless): every markdown file, anywhere.
+*.md @docs-team
+
+# Explicitly unowned generated output (matching rule, zero owners).
+/generated/

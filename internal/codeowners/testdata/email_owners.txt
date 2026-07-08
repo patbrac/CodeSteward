@@ -1,0 +1,4 @@
+# Email and mixed owner forms.
+* dev@example.com
+/src/ alice@example.com @bob
+/docs/ not-an-owner bad@@x
