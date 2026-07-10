@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "evidence_id": "evidence:coupling-partial-change-001",
+    "kind": "calculation",
+    "claim_support": "supports",
+    "subject_ids": [
+      "file:refund-policy",
+      "file:ledger-refunds"
+    ],
+    "revision_context": {
+      "side": "history",
+      "revision_id": "git:2222222222222222222222222222222222222222",
+      "repository_id": "repository:acme-platform"
+    },
+    "provenance": {
+      "adapter_id": "git-history",
+      "adapter_version": "0.1.0",
+      "observation_ids": [
+        "observation:cochange-set-001"
+      ]
+    },
+    "basis": {
+      "type": "calculation",
+      "method": "jaccard_similarity",
+      "parameters": [
+        { "name": "minimum_support", "value": 5 },
+        { "name": "minimum_jaccard", "value": 0.35 },
+        { "name": "shared_commits", "value": 11 }
+      ],
+      "result": 0.478,
+      "threshold": 0.35,
+      "comparator": "gte"
+    },
+    "confidence": {
+      "score": 0.93,
+      "level": "high",
+      "rationale": [
+        "History is complete for the configured window."
+      ]
+    },
+    "limitations": [
+      {
+        "code": "dynamic-imports-unresolved",
+        "message": "Two dynamic imports were not resolved by syntax-only analysis.",
+        "impact": "scope_reduced"
+      }
+    ]
+  },
+  "non_semantic_metadata": {
+    "display_locations": [
+      {
+        "repository_relative_path": "src/payments/refund-policy.ts",
+        "line_start": 14,
+        "line_end": 48
+      }
+    ],
+    "render_order": 1
+  }
+}

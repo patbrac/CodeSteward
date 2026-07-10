@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/plugin/v0/plugin-manifest.schema.json",
+  "title": "Plugin manifest placeholder v0",
+  "description": "A non-executable placeholder for future out-of-process plugin negotiation. Phase 1 does not load plugins.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_status",
+    "plugin_id",
+    "plugin_version",
+    "protocol_version",
+    "capabilities"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "contract_status": {
+      "const": "placeholder"
+    },
+    "plugin_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9.-]*$",
+      "maxLength": 128
+    },
+    "plugin_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$",
+      "maxLength": 128
+    },
+    "protocol_version": {
+      "const": "0.1.0"
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["external_evidence", "deterministic_observations"]
+      }
+    }
+  }
+}

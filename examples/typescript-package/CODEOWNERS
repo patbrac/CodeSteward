@@ -1,4 +1,0 @@
-* @maintainers
-/src/parser/ @parser-maintainers
-/src/public/ @api-maintainers
-/docs/ @docs-maintainers

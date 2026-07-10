@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "workspace_id": "workspace:acme-platform",
+    "repository_id": "repository:acme-platform",
+    "base": {
+      "revision_id": "git:1111111111111111111111111111111111111111",
+      "observation_set_id": "observations:base-001"
+    },
+    "head": {
+      "revision_id": "git:2222222222222222222222222222222222222222",
+      "observation_set_id": "observations:head-001"
+    },
+    "dimensions": {
+      "ownership": {
+        "direction": "unchanged",
+        "base_observation_ids": ["observation:ownership-base-001"],
+        "head_observation_ids": ["observation:ownership-head-001"],
+        "base_metrics": { "active_owner_count": 2 },
+        "head_metrics": { "active_owner_count": 2 },
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "coupling": {
+        "direction": "unchanged",
+        "base_observation_ids": ["observation:coupling-base-001"],
+        "head_observation_ids": ["observation:coupling-head-001"],
+        "base_metrics": { "strong_pair_count": 1 },
+        "head_metrics": { "strong_pair_count": 1 },
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "duplication": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": { "new_clone_count": 0 },
+        "head_metrics": { "new_clone_count": 0 },
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "architecture": {
+        "direction": "worsened",
+        "base_observation_ids": ["observation:architecture-base-001"],
+        "head_observation_ids": ["observation:import-edge-001"],
+        "base_metrics": { "boundary_violation_count": 0 },
+        "head_metrics": { "boundary_violation_count": 1 },
+        "findings": {
+          "new": ["mif:v0:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+          "unchanged": [],
+          "resolved": [],
+          "regressed": []
+        }
+      },
+      "test_evidence": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": { "linked_test_count": 4 },
+        "head_metrics": { "linked_test_count": 4 },
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "dependency_burden": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": { "direct_dependency_count": 12 },
+        "head_metrics": { "direct_dependency_count": 12 },
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      }
+    }
+  },
+  "non_semantic_metadata": {
+    "display_dimension_order": [
+      "ownership",
+      "coupling",
+      "duplication",
+      "architecture",
+      "test_evidence",
+      "dependency_burden"
+    ]
+  }
+}

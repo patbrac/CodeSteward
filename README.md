@@ -1,166 +1,71 @@
-# CodeSteward
+# Code Steward
 
-CodeSteward is an Apache-licensed, deterministic PR/MR review-readiness bot that leaves one compact comment telling contributors whether a change is ready for maintainer review — no AI, no blocking.
+Code Steward is a deterministic maintenance-intelligence system for software teams. It turns repository structure, change history, and declared policy into evidence-backed findings about maintenance risk. It does not rank developers, infer whether code was AI-generated, or execute the repository it examines.
 
-## What it does
+The project is in pre-alpha development. Interfaces may change, and no released platform is yet designated as production-supported. See [the roadmap](ROADMAP.md) for the maturity plan.
 
-CodeSteward looks at the diff between a base and head ref and reports, deterministically:
+## Trust contract
 
-- Whether changed files have clear **CODEOWNERS** ownership.
-- Whether matching **tests** appear to have been updated (path-aware, language-agnostic).
-- Whether the change is too **large or too broad** in scope.
-- Whether the PR/MR **description** is adequate.
-- Whether **sensitive files** (lockfiles, manifests, CI workflows) changed.
+- Deterministic evidence, not model output, is the source of truth for findings and policy decisions.
+- A normal scan is local-first, works without a service account, and makes no network request.
+- Repositories are untrusted input. Code Steward does not run builds, hooks, filters, package managers, or project code while scanning.
+- Windows, macOS, and Linux are first-class native targets. A target becomes supported only after its published native verification gates pass.
+- Reports and public schemas are portable. Users can export and delete derived local data.
 
-It rolls those observations into an internal readiness score and a single, contributor-friendly comment. It never blocks, labels, assigns reviewers, or moderates contributors.
+The complete deterministic scanner is Apache-2.0 software. Paid products may add managed operation, organization history, collaboration, identity mapping, centrally managed policy, enterprise integrations, access controls, support, and contractual assurance. They may not withhold a more accurate analyzer, private-repository scanning, security fixes, evidence, local policy, export, or deletion. The detailed boundary is in the [product contract](docs/product-contract.md).
 
-## Example comment
+## Prerequisites
 
-This is exactly what CodeSteward posts for a change to `src/runtime/cache.ts` with an empty description in the demo package (Scenario 2):
+Install the following natively on Windows, macOS, or Linux:
 
-```markdown
-<!-- codesteward-report -->
+- [Git](https://git-scm.com/downloads).
+- [Rust through `rustup`](https://rustup.rs/). The workspace's toolchain file is authoritative when present; `rustup` installs it on demand.
+- A platform linker supported by Rust. On Windows, install Visual Studio Build Tools with **Desktop development with C++** when using the MSVC toolchain. On macOS, install Xcode Command Line Tools. Linux package names vary by distribution; a C toolchain and linker are normally required.
 
-## CodeSteward: Needs contributor action
+The first Cargo build may download Rust crates. Project commands must not execute the checked-out repository's hooks, build scripts, or other code beyond Code Steward's own trusted build dependencies.
 
-**Review burden:** Medium  
-**Ownership:** Partial  
-**Tests:** Missing matching updates
+## Clean-clone build
 
-Thanks for the contribution. A few changes would make this easier for maintainers to review.
+Replace `<repository-url>` with `https://github.com/patbrac/CodeSteward.git` or a reviewed fork URL.
 
-### Before maintainer review
+POSIX shell (Linux or macOS):
 
-- Add or update matching tests for `src/runtime/cache.ts`.
-- Add a short description explaining the motivation and test plan.
-- Add specific ownership for `src/runtime/**` or ask a maintainer to route this area.
-
-<details>
-<summary>Why CodeSteward flagged this</summary>
-
-- `src/runtime/cache.ts` changed, but no matching test file was changed.
-- The PR description is empty.
-- `src/runtime/cache.ts` is covered only by fallback ownership: `* @maintainers`.
-
-</details>
-
-_Comment-only mode. CodeSteward is not blocking this PR._
+```sh
+git clone <repository-url> code-steward
+cd code-steward
+rustup show active-toolchain
+cargo build --workspace --locked
+cargo test --workspace --locked
+cargo run --locked -p steward-cli -- version
 ```
 
-The `<!-- codesteward-report -->` marker is how CodeSteward finds and **updates** its own comment instead of posting a duplicate on every push.
+PowerShell (native Windows):
 
-## Comment-only mode
-
-CodeSteward runs in **comment-only mode** in v0, and this is the only mode. It posts (or updates) a single Markdown comment and always exits successfully — the `scan` command never fails a build because of report content. CodeSteward does not set commit statuses, does not block merges, does not add labels, and does not request reviewers. The final line of every comment states this plainly: `_Comment-only mode. CodeSteward is not blocking this PR._`
-
-## Deterministic, no AI in v0
-
-CodeSteward is **fully deterministic and uses no AI or LLM in v0.** Identical inputs always produce byte-identical output: findings, action items, owners, and file lists are sorted with a fixed canonical order, and reports contain no timestamps, random values, or absolute paths. Every finding maps to a documented rule ID with a fixed penalty. This makes reports reproducible, reviewable, and safe to diff in CI.
-
-## Install and run locally
-
-Build the CLI from source (Go 1.24+):
-
-```bash
-git clone https://github.com/codesteward-ai/codesteward
-cd codesteward
-go build -o bin/codesteward ./cmd/codesteward
+```powershell
+git clone <repository-url> code-steward
+Set-Location code-steward
+rustup show active-toolchain
+cargo build --workspace --locked
+cargo test --workspace --locked
+cargo run --locked -p steward-cli -- version
 ```
 
-Then scan a change from your repository root:
+These are bounded development commands: they build the finite workspace and run its checked-in test suites; they do not scan an arbitrary directory. `--locked` prevents an implicit lockfile update. If a dependency fetch is required, use Cargo's normal network access once, then repeat with `CARGO_NET_OFFLINE=true` (POSIX) or `$env:CARGO_NET_OFFLINE = "true"` (PowerShell) to check offline operation.
 
-```bash
-# Scan the current branch against main, print the Markdown report to stdout
-codesteward scan --base main --head HEAD --format markdown
+For the complete format, lint, test, and documentation checks, see [CONTRIBUTING.md](CONTRIBUTING.md). Command behavior and exit codes are documented in the CLI help (`steward --help`) as commands stabilize.
 
-# Write a JSON report (includes the internal score) to a file
-codesteward scan --base main --format json --output codesteward-report.json
+## Security and privacy
 
-# Reveal the internal score in the Markdown report (hidden by default)
-codesteward scan --base main --show-score
-```
+Do not open a public issue for a suspected vulnerability. Use [GitHub private vulnerability reporting](SECURITY.md#report-a-vulnerability). The [threat model](docs/security/threat-model.md) describes the non-execution boundary, path containment, resource controls, terminal safety, plugin isolation, source handling, and supply-chain assumptions.
 
-Other commands:
+By default, Code Steward keeps source and derived state on the user's machine. A future operation that transmits source or executes a build must be separately named, explicitly enabled, and outside the default scan boundary.
 
-```bash
-codesteward version
-codesteward ownership audit            # repository-wide ownership coverage
-codesteward config validate            # validate .codesteward.yaml
-codesteward codeowners validate        # validate CODEOWNERS syntax
-```
+## Contributing and support
 
-## Install on GitHub Actions
+Contributions are accepted under the [Developer Certificate of Origin](CONTRIBUTING.md#developer-certificate-of-origin), without a broad CLA. Start with [the contribution guide](CONTRIBUTING.md), review [governance](GOVERNANCE.md), and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Add a workflow that checks out the full history (`fetch-depth: 0` is required so the diff base resolves) and runs the CodeSteward action with commenting enabled:
+Use GitHub issues for reproducible bugs and scoped feature proposals. See [SUPPORT.md](SUPPORT.md) for what the community project supports and what belongs in a private security report.
 
-```yaml
-name: CodeSteward
+## License and marks
 
-on:
-  pull_request:
-    types: [opened, synchronize, edited, reopened]
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  codesteward:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: codesteward-ai/codesteward/actions/github@v0
-        with:
-          comment: true
-```
-
-`pull-requests: write` is required so CodeSteward can post and update its single PR comment. See [docs/github.md](docs/github.md) for details.
-
-## Install on GitLab CI
-
-Add a job to `.gitlab-ci.yml` (or include the provided template) that runs on merge request pipelines:
-
-```yaml
-codesteward:
-  image: ghcr.io/codesteward-ai/codesteward:v0.1.0
-  variables:
-    # Full history so CodeSteward can diff against the merge request target.
-    GIT_DEPTH: 0
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  script:
-    - codesteward scan --comment
-```
-
-CodeSteward posts the MR note using `CODESTEWARD_GITLAB_TOKEN` if set, otherwise `CI_JOB_TOKEN`. See [docs/gitlab.md](docs/gitlab.md) for token requirements.
-
-## 60-second walkthrough
-
-The [`examples/typescript-package`](examples/typescript-package) demo is a small TypeScript library with a deliberate ownership gap: its `CODEOWNERS` gives specific owners to `/src/parser/`, `/src/public/`, and `/docs/`, but `src/runtime/` is covered only by the `* @maintainers` fallback. Three scenarios show the product in under a minute:
-
-1. **Good PR** — change `src/parser/tokenize.ts` *and* `tests/parser/tokenize.test.ts` with a real description. CodeSteward reports **Ready for maintainer review**, ownership complete, matching tests changed, review burden low, score 100.
-2. **Missing tests and weak ownership** — change only `src/runtime/cache.ts` with an empty description. CodeSteward reports **Needs contributor action**, ownership partial, missing matching tests, review burden medium (this is the example comment above).
-3. **Broad PR** — change `src/parser/parse.ts`, `src/runtime/cache.ts`, `docs/usage.md`, `package.json`, and `.github/workflows/release.yml` together. CodeSteward reports **High review burden**, flags mixed concerns, dependency-plus-source changes, and sensitive CI/manifest changes, and suggests splitting the PR.
-
-Run scenario 2 yourself:
-
-```bash
-cd examples/typescript-package
-codesteward scan --base main --head HEAD
-```
-
-## Documentation
-
-- [Product spec](docs/product-spec.md) — v0 scope, statuses, burdens, ownership and test states.
-- [Non-goals](docs/non-goals.md) — what CodeSteward deliberately is not.
-- [Rules](docs/rules.md) — the full rule catalog, scoring model, and status thresholds.
-- [Reports](docs/reports.md) — Markdown and JSON report anatomy.
-- [Config](docs/config.md) — every `.codesteward.yaml` key and its default.
-- [CODEOWNERS](docs/codeowners.md) — discovery, dialects, and matching semantics.
-
-## License
-
-Apache License 2.0. Copyright 2026 The CodeSteward Authors. See [LICENSE](LICENSE).
+Code is licensed under the [Apache License 2.0](LICENSE). The license does not grant rights to project names or logos; see [TRADEMARKS.md](TRADEMARKS.md) for permitted nominative and compatibility use.

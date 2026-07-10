@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json",
+  "title": "Maintenance intelligence evidence v0",
+  "description": "Deterministic evidence supporting a finding. Display hints are isolated from semantic evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "semantic"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "semantic": {
+      "$ref": "#/$defs/semantic_evidence"
+    },
+    "non_semantic_metadata": {
+      "$ref": "#/$defs/non_semantic_metadata"
+    }
+  },
+  "$defs": {
+    "stable_id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9._-]*:[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "$comment": "Stable IDs cannot contain filesystem separators, whitespace, or machine-local paths."
+    },
+    "semantic_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "canonical_scalar": {
+      "anyOf": [
+        { "type": "boolean" },
+        { "type": "integer" },
+        { "type": "number" },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      ]
+    },
+    "named_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "maxLength": 128
+        },
+        "value": {
+          "$ref": "#/$defs/canonical_scalar"
+        }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "level", "rationale"],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "level": {
+          "enum": ["low", "moderate", "high", "exact"]
+        },
+        "rationale": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      }
+    },
+    "limitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "impact"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "impact": {
+          "enum": ["none", "scope_reduced", "confidence_reduced", "result_incomplete"]
+        }
+      }
+    },
+    "revision_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["side", "revision_id", "repository_id"],
+      "properties": {
+        "side": {
+          "enum": ["base", "head", "history", "external_snapshot"]
+        },
+        "revision_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "repository_id": {
+          "$ref": "#/$defs/stable_id"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter_id", "adapter_version", "observation_ids"],
+      "properties": {
+        "adapter_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "adapter_version": {
+          "$ref": "#/$defs/semantic_version"
+        },
+        "observation_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "external_snapshot_id": {
+          "$ref": "#/$defs/stable_id"
+        }
+      }
+    },
+    "observation_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "observation_kind", "facts"],
+      "properties": {
+        "type": {
+          "const": "observation"
+        },
+        "observation_kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$",
+          "maxLength": 128
+        },
+        "facts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/named_value"
+          }
+        }
+      }
+    },
+    "comparison_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "base_evidence_ids", "head_evidence_ids", "relationship_id"],
+      "properties": {
+        "type": {
+          "const": "comparison"
+        },
+        "base_evidence_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "head_evidence_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "relationship_id": {
+          "$ref": "#/$defs/stable_id"
+        }
+      }
+    },
+    "calculation_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "method", "parameters", "result"],
+      "properties": {
+        "type": {
+          "const": "calculation"
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$",
+          "maxLength": 128
+        },
+        "parameters": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/named_value"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/canonical_scalar"
+        },
+        "threshold": {
+          "$ref": "#/$defs/canonical_scalar"
+        },
+        "comparator": {
+          "enum": ["eq", "neq", "lt", "lte", "gt", "gte", "contains"]
+        }
+      }
+    },
+    "policy_rule_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "policy_rule_id", "policy_rule_version", "matched_relationship_id"],
+      "properties": {
+        "type": {
+          "const": "policy_rule"
+        },
+        "policy_rule_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "policy_rule_version": {
+          "$ref": "#/$defs/semantic_version"
+        },
+        "matched_relationship_id": {
+          "$ref": "#/$defs/stable_id"
+        }
+      }
+    },
+    "semantic_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "kind",
+        "claim_support",
+        "subject_ids",
+        "revision_context",
+        "provenance",
+        "basis",
+        "confidence",
+        "limitations"
+      ],
+      "properties": {
+        "evidence_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "kind": {
+          "enum": ["observation", "comparison", "calculation", "policy_rule"]
+        },
+        "claim_support": {
+          "enum": ["supports", "contradicts", "context"]
+        },
+        "subject_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "revision_context": {
+          "$ref": "#/$defs/revision_context"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "basis": {
+          "oneOf": [
+            { "$ref": "#/$defs/observation_basis" },
+            { "$ref": "#/$defs/comparison_basis" },
+            { "$ref": "#/$defs/calculation_basis" },
+            { "$ref": "#/$defs/policy_rule_basis" }
+          ]
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "limitations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/limitation"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "type": "object", "properties": { "kind": { "const": "observation" } }, "required": ["kind"] },
+          "then": { "type": "object", "properties": { "basis": { "$ref": "#/$defs/observation_basis" } } }
+        },
+        {
+          "if": { "type": "object", "properties": { "kind": { "const": "comparison" } }, "required": ["kind"] },
+          "then": { "type": "object", "properties": { "basis": { "$ref": "#/$defs/comparison_basis" } } }
+        },
+        {
+          "if": { "type": "object", "properties": { "kind": { "const": "calculation" } }, "required": ["kind"] },
+          "then": { "type": "object", "properties": { "basis": { "$ref": "#/$defs/calculation_basis" } } }
+        },
+        {
+          "if": { "type": "object", "properties": { "kind": { "const": "policy_rule" } }, "required": ["kind"] },
+          "then": { "type": "object", "properties": { "basis": { "$ref": "#/$defs/policy_rule_basis" } } }
+        }
+      ]
+    },
+    "display_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_relative_path"],
+      "properties": {
+        "repository_relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\\\r\\n]+$",
+          "$comment": "Display paths are repository-relative, use '/', and are never fingerprint inputs."
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "non_semantic_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/display_location"
+          }
+        },
+        "render_order": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/report/v0/finding.schema.json",
+  "title": "Maintenance intelligence finding v0",
+  "description": "An evidence-backed deterministic claim. Eligibility never constitutes a policy decision by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "semantic"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "semantic": {
+      "$ref": "#/$defs/semantic_finding"
+    },
+    "non_semantic_metadata": {
+      "$ref": "#/$defs/non_semantic_metadata"
+    }
+  },
+  "$defs": {
+    "stable_id": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/stable_id"
+    },
+    "semantic_version": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/semantic_version"
+    },
+    "confidence": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/confidence"
+    },
+    "limitation": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/limitation"
+    },
+    "fingerprint_parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value"],
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_.-]*$",
+              "maxLength": 128
+            },
+            {
+              "not": {
+                "type": "string",
+                "pattern": "(^|[._-])(path|line|column|timestamp|time|date|locale|timezone|host|os|arch|duration|order|run)([._-]|$)"
+              }
+            }
+          ]
+        },
+        "value": {
+          "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/canonical_scalar"
+        }
+      }
+    },
+    "fingerprint_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "Only this object is fingerprint-relevant. Implementations canonicalize set-like arrays using locale-independent byte ordering. Machine paths, timestamps, locations, host data, locale, duration, and display order are prohibited inputs.",
+      "required": [
+        "namespace_version",
+        "rule_id",
+        "rule_major_version",
+        "subject_ids",
+        "relationship_ids",
+        "parameters"
+      ],
+      "properties": {
+        "namespace_version": {
+          "const": "v0"
+        },
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "rule_major_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "subject_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "relationship_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "parameters": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/fingerprint_parameter"
+          }
+        }
+      }
+    },
+    "suggested_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action_id", "summary", "verification", "destructive"],
+      "properties": {
+        "action_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "verification": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "destructive": {
+          "const": false
+        }
+      }
+    },
+    "suppression_reference": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["suppression_id", "scope"],
+          "properties": {
+            "suppression_id": {
+              "$ref": "#/$defs/stable_id"
+            },
+            "scope": {
+              "enum": ["fingerprint", "entity", "rule"]
+            }
+          }
+        }
+      ]
+    },
+    "block_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason_codes"],
+      "properties": {
+        "status": {
+          "enum": ["advisory_only", "eligible_with_policy"]
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "heuristic_advisory",
+              "deterministic_evidence_complete",
+              "exact_policy_match",
+              "confidence_below_policy_floor",
+              "incomplete_required_analyzer"
+            ]
+          }
+        }
+      }
+    },
+    "semantic_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fingerprint",
+        "fingerprint_basis",
+        "rule_id",
+        "rule_version",
+        "state",
+        "severity",
+        "confidence",
+        "subject_ids",
+        "summary",
+        "explanation",
+        "evidence",
+        "evidence_completeness",
+        "limitations",
+        "suggested_actions",
+        "introduced_at_revision",
+        "baseline_revision",
+        "head_revision",
+        "block_eligibility",
+        "suppression"
+      ],
+      "properties": {
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^mif:v0:[a-f0-9]{64}$"
+        },
+        "fingerprint_basis": {
+          "$ref": "#/$defs/fingerprint_basis"
+        },
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "rule_version": {
+          "$ref": "#/$defs/semantic_version"
+        },
+        "state": {
+          "enum": ["new", "unchanged", "resolved", "regressed"]
+        },
+        "severity": {
+          "enum": ["info", "low", "medium", "high", "critical"]
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "subject_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json"
+          }
+        },
+        "evidence_completeness": {
+          "enum": ["complete", "degraded", "incomplete"]
+        },
+        "limitations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/limitation"
+          }
+        },
+        "suggested_actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/suggested_action"
+          }
+        },
+        "introduced_at_revision": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "baseline_revision": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "head_revision": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "block_eligibility": {
+          "$ref": "#/$defs/block_eligibility"
+        },
+        "suppression": {
+          "$ref": "#/$defs/suppression_reference"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "block_eligibility": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "eligible_with_policy"
+                  }
+                },
+                "required": ["status"]
+              }
+            },
+            "required": ["block_eligibility"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "evidence_completeness": {
+                "const": "complete"
+              },
+              "evidence": {
+                "type": "array",
+                "minItems": 1
+              },
+              "block_eligibility": {
+                "type": "object",
+                "properties": {
+                  "reason_codes": {
+                    "type": "array",
+                    "contains": {
+                      "const": "deterministic_evidence_complete"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "non_semantic_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "Run-local identity, display locations, and ordering never participate in a fingerprint or policy decision.",
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "display_locations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/display_location"
+          }
+        },
+        "render_order": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

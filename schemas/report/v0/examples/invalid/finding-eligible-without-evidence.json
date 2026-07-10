@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "fingerprint": "mif:v0:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "fingerprint_basis": {
+      "namespace_version": "v0",
+      "rule_id": "architecture.boundary-violation",
+      "rule_major_version": 1,
+      "subject_ids": ["module:payments-domain"],
+      "relationship_ids": ["relationship:payments-imports-ui"],
+      "parameters": []
+    },
+    "rule_id": "architecture.boundary-violation",
+    "rule_version": "1.0.0",
+    "state": "new",
+    "severity": "high",
+    "confidence": {
+      "score": 1,
+      "level": "exact",
+      "rationale": ["Claimed exact without supplied evidence."]
+    },
+    "subject_ids": ["module:payments-domain"],
+    "summary": "This intentionally invalid finding has no evidence.",
+    "explanation": "Eligibility cannot be asserted when the evidence array is empty.",
+    "evidence": [],
+    "evidence_completeness": "complete",
+    "limitations": [],
+    "suggested_actions": [
+      {
+        "action_id": "inspect-evidence",
+        "summary": "Supply deterministic evidence before policy evaluation.",
+        "verification": "Validate the finding against the schema.",
+        "destructive": false
+      }
+    ],
+    "introduced_at_revision": "git:2222222222222222222222222222222222222222",
+    "baseline_revision": "git:1111111111111111111111111111111111111111",
+    "head_revision": "git:2222222222222222222222222222222222222222",
+    "block_eligibility": {
+      "status": "eligible_with_policy",
+      "reason_codes": ["deterministic_evidence_complete"]
+    },
+    "suppression": null
+  }
+}

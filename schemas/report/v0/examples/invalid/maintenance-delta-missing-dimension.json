@@ -1,0 +1,57 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "workspace_id": "workspace:acme-platform",
+    "repository_id": "repository:acme-platform",
+    "base": {
+      "revision_id": "git:1111111111111111111111111111111111111111",
+      "observation_set_id": "observations:base-001"
+    },
+    "head": {
+      "revision_id": "git:2222222222222222222222222222222222222222",
+      "observation_set_id": "observations:head-001"
+    },
+    "dimensions": {
+      "ownership": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": {},
+        "head_metrics": {},
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "coupling": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": {},
+        "head_metrics": {},
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "duplication": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": {},
+        "head_metrics": {},
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "architecture": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": {},
+        "head_metrics": {},
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      },
+      "test_evidence": {
+        "direction": "unchanged",
+        "base_observation_ids": [],
+        "head_observation_ids": [],
+        "base_metrics": {},
+        "head_metrics": {},
+        "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+      }
+    }
+  }
+}

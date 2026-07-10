@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/export/v0/export-envelope.schema.json",
+  "title": "Portable export envelope placeholder v0",
+  "description": "A metadata-only placeholder for a future portable export contract. It contains no source code or machine-local path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_status",
+    "export_kind",
+    "producer_version",
+    "payload_digest",
+    "record_count"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "contract_status": {
+      "const": "placeholder"
+    },
+    "export_kind": {
+      "enum": ["maintenance-report"]
+    },
+    "producer_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$",
+      "maxLength": 128
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "record_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

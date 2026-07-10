@@ -3,48 +3,190 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  prepare:
+    name: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      matrix: ${{ steps.release.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out tagged source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-go@v5
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          go-version-file: go.mod
+          python-version: "3.13"
+          check-latest: false
 
-      - name: Build release artifacts
-        run: make build-all
+      - name: Validate tag, package version, and target matrix
+        id: release
         env:
-          VERSION: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/release/validate_release.py
 
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+  build:
+    name: build-${{ matrix.id }}
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          files: dist/*
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          python-version: "3.13"
+          check-latest: false
 
-      - name: Build and push image
-        uses: docker/build-push-action@v6
+      - name: Install native Rust target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build native release binary
+        run: cargo build --locked --release -p steward-cli --target ${{ matrix.target }}
+
+      - name: Generate locked third-party license attribution
+        env:
+          ATTRIBUTIONS_TARGET: ${{ matrix.target }}
+          ATTRIBUTIONS_OUTPUT: ${{ runner.temp }}/THIRD_PARTY_LICENSES.txt
+        run: python scripts/release/generate_attributions.py
+
+      - name: Create normalized archive and checksum
+        id: package
+        env:
+          PACKAGE_BINARY: ${{ matrix.binary }}
+          PACKAGE_TARGET: ${{ matrix.target }}
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
+          PACKAGE_FORMAT: ${{ matrix.archive }}
+          PACKAGE_OUTPUT_DIR: dist
+          ATTRIBUTIONS_PATH: ${{ runner.temp }}/THIRD_PARTY_LICENSES.txt
+        run: python scripts/release/package.py
+
+      - name: Record Linux GLIBC symbol baseline
+        if: matrix.id == 'linux-x64'
+        env:
+          GLIBC_BINARY: ${{ matrix.binary }}
+          GLIBC_OUTPUT: dist/${{ steps.package.outputs.asset-name }}.glibc.txt
+        run: python scripts/release/check_glibc.py
+
+      - name: Clean install, native offline run, and uninstall
+        env:
+          RELEASE_ARCHIVE: ${{ steps.package.outputs.asset-path }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: python scripts/release/install_smoke.py
+
+      - name: Generate SPDX JSON SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          context: .
-          push: true
-          build-args: |
-            VERSION=${{ github.ref_name }}
-          tags: |
-            ghcr.io/codesteward-ai/codesteward:${{ github.ref_name }}
-            ghcr.io/codesteward-ai/codesteward:latest
+          path: .
+          format: spdx-json
+          output-file: dist/${{ steps.package.outputs.asset-name }}.spdx.json
+          artifact-name: ${{ steps.package.outputs.asset-name }}.spdx.json
+          syft-version: v1.46.0
+          dependency-snapshot: false
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate keyless build-provenance attestation
+        id: provenance
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-path: ${{ steps.package.outputs.asset-path }}
+
+      - name: Preserve provenance bundle
+        env:
+          SOURCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          DESTINATION_BUNDLE: dist/${{ steps.package.outputs.asset-name }}.provenance.bundle.json
+        run: python scripts/release/copy_bundle.py
+
+      - name: Generate keyless SBOM attestation
+        id: sbom-attestation
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-path: ${{ steps.package.outputs.asset-path }}
+          sbom-path: dist/${{ steps.package.outputs.asset-name }}.spdx.json
+
+      - name: Preserve SBOM attestation bundle
+        env:
+          SOURCE_BUNDLE: ${{ steps.sbom-attestation.outputs.bundle-path }}
+          DESTINATION_BUNDLE: dist/${{ steps.package.outputs.asset-name }}.sbom.bundle.json
+        run: python scripts/release/copy_bundle.py
+
+      - name: Upload verified target assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-${{ matrix.id }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: publish
+    needs:
+      - prepare
+      - build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+          check-latest: false
+
+      - name: Download target assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+
+      - name: Create and verify release-wide checksums
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: python scripts/release/write_checksums.py dist && python scripts/release/verify_release_assets.py dist --version "$RELEASE_VERSION"
+
+      - name: Create immutable-ready draft, upload all assets, and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --generate-notes --title "steward $RELEASE_TAG"
+          gh release upload "$RELEASE_TAG" dist/*
+          gh release edit "$RELEASE_TAG" --draft=false

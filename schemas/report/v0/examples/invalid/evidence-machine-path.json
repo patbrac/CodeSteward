@@ -1,0 +1,38 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "evidence_id": "evidence:absolute-path-001",
+    "kind": "observation",
+    "claim_support": "supports",
+    "subject_ids": ["file:refund-policy"],
+    "revision_context": {
+      "side": "head",
+      "revision_id": "git:2222222222222222222222222222222222222222",
+      "repository_id": "repository:acme-platform"
+    },
+    "provenance": {
+      "adapter_id": "typescript",
+      "adapter_version": "0.1.0",
+      "observation_ids": ["observation:import-edge-001"]
+    },
+    "basis": {
+      "type": "observation",
+      "observation_kind": "module_import",
+      "facts": []
+    },
+    "confidence": {
+      "score": 1,
+      "level": "exact",
+      "rationale": ["The import is syntactically exact."]
+    },
+    "limitations": []
+  },
+  "non_semantic_metadata": {
+    "display_locations": [
+      {
+        "repository_relative_path": "C:\\work\\repo\\src\\payments\\refund-policy.ts",
+        "line_start": 14
+      }
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "tool_version": "0.1.0",
+    "scan_inputs": {
+      "workspace_id": "workspace:acme-platform",
+      "repository_id": "repository:acme-platform",
+      "repository_object_database_id": "gitodb:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "base_revision": "git:1111111111111111111111111111111111111111",
+      "head_revision": "git:2222222222222222222222222222222222222222",
+      "configuration_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "analyzers": {},
+      "external_snapshot_ids": {}
+    },
+    "maintenance_delta": {
+      "schema_version": "0.1.0",
+      "semantic": {
+        "workspace_id": "workspace:acme-platform",
+        "repository_id": "repository:acme-platform",
+        "base": {
+          "revision_id": "git:1111111111111111111111111111111111111111",
+          "observation_set_id": "observations:base-001"
+        },
+        "head": {
+          "revision_id": "git:2222222222222222222222222222222222222222",
+          "observation_set_id": "observations:head-001"
+        },
+        "dimensions": {
+          "ownership": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "coupling": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "duplication": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "architecture": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "test_evidence": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "dependency_burden": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          }
+        }
+      }
+    },
+    "findings": [],
+    "policy_decisions": [],
+    "diagnostics": [],
+    "completeness": "complete",
+    "ai_policy_decision": {
+      "decision": "fail",
+      "explanation": "A model claimed the change should be blocked."
+    }
+  }
+}

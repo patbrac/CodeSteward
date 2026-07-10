@@ -1,0 +1,54 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Chicago
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    versioning-strategy: lockfile-only
+    groups:
+      rust-patch-and-minor:
+        update-types:
+          - patch
+          - minor
+    commit-message:
+      prefix: deps
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:15"
+      timezone: America/Chicago
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci
+      include: scope
+
+  - package-ecosystem: pip
+    directory: /scripts/ci
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:30"
+      timezone: America/Chicago
+    open-pull-requests-limit: 3
+    rebase-strategy: auto
+    groups:
+      schema-tooling:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci
+      include: scope
