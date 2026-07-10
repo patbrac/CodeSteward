@@ -1,30 +1,33 @@
-<!--
-Thanks for contributing to CodeSteward! Please fill out the sections below.
-Keep changes focused and deterministic. See CONTRIBUTING.md.
--->
+## Outcome
 
-## Summary
+Describe the user-visible result and why this is the smallest coherent change.
 
-<!-- What does this PR change, and why? Link the issue it addresses, e.g. Closes #123. -->
+## Evidence and tests
 
-## Test plan
+- [ ] `cargo fmt --all -- --check`
+- [ ] `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- [ ] `cargo build --workspace --locked`
+- [ ] `cargo test --workspace --locked`
+- [ ] Schema/golden/native-platform checks affected by this change
+- [ ] Checks not run are named and explained below; no unrun check is marked passed
 
-<!-- How did you verify this change? List commands and results. -->
+Evidence, fixtures, and checks not run:
 
-- [ ] `gofmt -l .` prints nothing
-- [ ] `go vet ./...` passes
-- [ ] `go test ./...` passes
-- [ ] Added or updated table-driven tests with `testdata/` fixtures
+## Trust and compatibility review
 
-## Checklist
+- [ ] Hostile inputs, resource bounds, terminal/log output, and failure cleanup were considered.
+- [ ] The change does not add implicit repository execution, network access, source transmission, or plugin activation.
+- [ ] Privacy/secrets and local data persistence/deletion were considered.
+- [ ] Determinism and native Windows, macOS, and Linux behavior were considered.
+- [ ] Public CLI/config/schema/plugin/output compatibility and migrations were considered.
+- [ ] The open-core and dependency-license boundaries remain intact.
 
-- [ ] The change is deterministic (no map-order dependence, timestamps, randomness, or absolute paths in output).
-- [ ] No new dependencies (stdlib + `gopkg.in/yaml.v3` only; did not run `go get`).
-- [ ] Documentation updated under `docs/` for any user-visible change.
-- [ ] If a rule was added or changed: rule ID, penalty, docs, and tests are all updated.
-- [ ] Reference scenarios still hold (or intentional changes are called out below).
-- [ ] This change stays within v0 scope (no AI review, security scanning, blocking, auto-labeling, auto-reviewer assignment, or moderation).
+Explain any material impact or why it is absent:
 
-## Notes for reviewers
+## Decision records and release notes
 
-<!-- Anything reviewers should pay special attention to, or intentional deviations from expected output. -->
+- [ ] Required ADR/RFC, schema examples, migration/deprecation note, documentation, and changelog are included or not applicable.
+- [ ] Every commit carries a DCO `Signed-off-by` line (`git commit --signoff`).
+- [ ] The diff contains no secret, private source/history, personal data, accidental machine path, or unrelated generated file.
+
+Related issue/ADR/RFC:

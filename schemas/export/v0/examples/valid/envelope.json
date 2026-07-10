@@ -1,0 +1,8 @@
+{
+  "schema_version": "0.1.0",
+  "contract_status": "placeholder",
+  "export_kind": "maintenance-report",
+  "producer_version": "0.1.0",
+  "payload_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "record_count": 0
+}

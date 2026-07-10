@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/report/v0/maintenance-delta.schema.json",
+  "title": "Maintenance delta v0",
+  "description": "Base/head maintenance comparison across the six initial dimensions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "semantic"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "semantic": {
+      "$ref": "#/$defs/semantic_delta"
+    },
+    "non_semantic_metadata": {
+      "$ref": "#/$defs/non_semantic_metadata"
+    }
+  },
+  "$defs": {
+    "stable_id": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/stable_id"
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^mif:v0:[a-f0-9]{64}$"
+    },
+    "revision_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision_id", "observation_set_id"],
+      "properties": {
+        "revision_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "observation_set_id": {
+          "$ref": "#/$defs/stable_id"
+        }
+      }
+    },
+    "metric_map": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9._-]*$",
+        "maxLength": 128
+      },
+      "additionalProperties": {
+        "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/canonical_scalar"
+      },
+      "$comment": "Object member order is non-semantic. Metric values use locale-independent JSON scalar representations."
+    },
+    "finding_states": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["new", "unchanged", "resolved", "regressed"],
+      "properties": {
+        "new": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fingerprint" }
+        },
+        "unchanged": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fingerprint" }
+        },
+        "resolved": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fingerprint" }
+        },
+        "regressed": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fingerprint" }
+        }
+      },
+      "$comment": "Each array is a mathematical set. Serialization order cannot affect semantics or fingerprints."
+    },
+    "dimension_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direction",
+        "base_observation_ids",
+        "head_observation_ids",
+        "base_metrics",
+        "head_metrics",
+        "findings"
+      ],
+      "properties": {
+        "direction": {
+          "enum": ["improved", "unchanged", "mixed", "worsened"]
+        },
+        "base_observation_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "head_observation_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stable_id"
+          }
+        },
+        "base_metrics": {
+          "$ref": "#/$defs/metric_map"
+        },
+        "head_metrics": {
+          "$ref": "#/$defs/metric_map"
+        },
+        "findings": {
+          "$ref": "#/$defs/finding_states"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ownership",
+        "coupling",
+        "duplication",
+        "architecture",
+        "test_evidence",
+        "dependency_burden"
+      ],
+      "properties": {
+        "ownership": { "$ref": "#/$defs/dimension_delta" },
+        "coupling": { "$ref": "#/$defs/dimension_delta" },
+        "duplication": { "$ref": "#/$defs/dimension_delta" },
+        "architecture": { "$ref": "#/$defs/dimension_delta" },
+        "test_evidence": { "$ref": "#/$defs/dimension_delta" },
+        "dependency_burden": { "$ref": "#/$defs/dimension_delta" }
+      }
+    },
+    "semantic_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspace_id", "repository_id", "base", "head", "dimensions"],
+      "properties": {
+        "workspace_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "repository_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "base": {
+          "$ref": "#/$defs/revision_state"
+        },
+        "head": {
+          "$ref": "#/$defs/revision_state"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/dimensions"
+        }
+      }
+    },
+    "non_semantic_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display_dimension_order": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ownership",
+              "coupling",
+              "duplication",
+              "architecture",
+              "test_evidence",
+              "dependency_burden"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

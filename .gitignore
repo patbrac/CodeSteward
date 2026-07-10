@@ -1,8 +1,40 @@
-# Build output
-/bin/
-/dist/
+# Rust build output
+/target/
+/.venv/
+**/*.rs.bk
 
-# Coverage files
-*.out
-coverage.txt
-coverage.html
+# Local scanner state and generated release output
+/.steward/
+/dist/
+/artifacts/
+*.profraw
+*.profdata
+__pycache__/
+*.py[cod]
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local Phase 0 research, commercial planning, and acceptance evidence.
+# These remain in the working directory but are not part of the public project.
+/CODE_STEWARD_BUSINESS_AND_OPEN_CORE_PLAN.md
+/CODE_STEWARD_OPEN_SOURCE_PRODUCT_PLAN.md
+/PRODUCT_PLAN_TASKS.md
+/evidence/
+/docs/validation/
+/docs/naming/
+/docs/mockups/
+/scripts/verify_planning_artifacts.py
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx

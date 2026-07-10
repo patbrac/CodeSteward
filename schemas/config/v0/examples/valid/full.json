@@ -1,0 +1,14 @@
+{
+  "version": "0.1",
+  "analysis": {
+    "max_file_bytes": 2097152,
+    "max_history_commits": 25000
+  },
+  "output": {
+    "format": "json",
+    "color": "never"
+  },
+  "policy": {
+    "mode": "advisory"
+  }
+}

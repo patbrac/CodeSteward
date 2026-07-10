@@ -1,0 +1,8 @@
+{
+  "schema_version": "0.1.0",
+  "contract_status": "placeholder",
+  "plugin_id": "example.history-observer",
+  "plugin_version": "0.1.0",
+  "protocol_version": "0.1.0",
+  "capabilities": ["deterministic_observations"]
+}

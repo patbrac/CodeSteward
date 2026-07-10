@@ -1,8 +1,0 @@
-# Pathological CODEOWNERS with many invalid / unsupported constructs.
-!/src/secret.ts @nobody
-/src/good.ts @good-team
-src/bad[.ts @team
-@justowners
-/lib/
-* @maintainers no-at-owner
-[Section] @x

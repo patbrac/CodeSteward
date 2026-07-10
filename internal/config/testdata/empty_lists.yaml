@@ -1,6 +1,0 @@
-# Present-but-empty lists must override the defaults to empty.
-ownership:
-  production_paths: []
-tests:
-  test_paths: []
-sensitive_paths: []

@@ -1,0 +1,181 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "tool_version": "0.1.0",
+    "scan_inputs": {
+      "workspace_id": "workspace:acme-platform",
+      "repository_id": "repository:acme-platform",
+      "repository_object_database_id": "gitodb:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "base_revision": "git:1111111111111111111111111111111111111111",
+      "head_revision": "git:2222222222222222222222222222222222222222",
+      "configuration_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "analyzers": {
+        "architecture.boundary-violation": "1.0.0"
+      },
+      "external_snapshot_ids": {}
+    },
+    "maintenance_delta": {
+      "schema_version": "0.1.0",
+      "semantic": {
+        "workspace_id": "workspace:acme-platform",
+        "repository_id": "repository:acme-platform",
+        "base": {
+          "revision_id": "git:1111111111111111111111111111111111111111",
+          "observation_set_id": "observations:base-001"
+        },
+        "head": {
+          "revision_id": "git:2222222222222222222222222222222222222222",
+          "observation_set_id": "observations:head-001"
+        },
+        "dimensions": {
+          "ownership": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "coupling": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "duplication": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "architecture": {
+            "direction": "worsened",
+            "base_observation_ids": [],
+            "head_observation_ids": ["observation:import-edge-001"],
+            "base_metrics": { "boundary_violation_count": 0 },
+            "head_metrics": { "boundary_violation_count": 1 },
+            "findings": {
+              "new": ["mif:v0:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+              "unchanged": [], "resolved": [], "regressed": []
+            }
+          },
+          "test_evidence": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          },
+          "dependency_burden": {
+            "direction": "unchanged", "base_observation_ids": [], "head_observation_ids": [],
+            "base_metrics": {}, "head_metrics": {},
+            "findings": { "new": [], "unchanged": [], "resolved": [], "regressed": [] }
+          }
+        }
+      }
+    },
+    "findings": [
+      {
+        "schema_version": "0.1.0",
+        "semantic": {
+          "fingerprint": "mif:v0:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "fingerprint_basis": {
+            "namespace_version": "v0",
+            "rule_id": "architecture.boundary-violation",
+            "rule_major_version": 1,
+            "subject_ids": ["module:payments-domain", "module:user-interface"],
+            "relationship_ids": ["relationship:payments-imports-ui"],
+            "parameters": [{ "name": "boundary_rule", "value": "deny-payments-ui" }]
+          },
+          "rule_id": "architecture.boundary-violation",
+          "rule_version": "1.0.0",
+          "state": "new",
+          "severity": "high",
+          "confidence": {
+            "score": 1,
+            "level": "exact",
+            "rationale": ["An exact import matches an explicit deny rule."]
+          },
+          "subject_ids": ["module:payments-domain", "module:user-interface"],
+          "summary": "A payments-domain import crosses a declared boundary.",
+          "explanation": "The resolved import exactly matches deny-payments-ui.",
+          "evidence": [
+            {
+              "schema_version": "0.1.0",
+              "semantic": {
+                "evidence_id": "evidence:boundary-rule-match-001",
+                "kind": "policy_rule",
+                "claim_support": "supports",
+                "subject_ids": ["module:payments-domain", "module:user-interface"],
+                "revision_context": {
+                  "side": "head",
+                  "revision_id": "git:2222222222222222222222222222222222222222",
+                  "repository_id": "repository:acme-platform"
+                },
+                "provenance": {
+                  "adapter_id": "typescript",
+                  "adapter_version": "0.1.0",
+                  "observation_ids": ["observation:import-edge-001"]
+                },
+                "basis": {
+                  "type": "policy_rule",
+                  "policy_rule_id": "deny-payments-ui",
+                  "policy_rule_version": "1.0.0",
+                  "matched_relationship_id": "relationship:payments-imports-ui"
+                },
+                "confidence": {
+                  "score": 1,
+                  "level": "exact",
+                  "rationale": ["Module membership and import resolution are exact."]
+                },
+                "limitations": []
+              }
+            }
+          ],
+          "evidence_completeness": "complete",
+          "limitations": [],
+          "suggested_actions": [
+            {
+              "action_id": "review-boundary-import",
+              "summary": "Remove the import or update the boundary through review.",
+              "verification": "Re-run the scan and confirm the finding is resolved.",
+              "destructive": false
+            }
+          ],
+          "introduced_at_revision": "git:2222222222222222222222222222222222222222",
+          "baseline_revision": "git:1111111111111111111111111111111111111111",
+          "head_revision": "git:2222222222222222222222222222222222222222",
+          "block_eligibility": {
+            "status": "eligible_with_policy",
+            "reason_codes": ["deterministic_evidence_complete", "exact_policy_match"]
+          },
+          "suppression": null
+        }
+      }
+    ],
+    "policy_decisions": [
+      {
+        "policy_rule_id": "block-new-boundary-violations",
+        "decision": "fail",
+        "finding_fingerprints": [
+          "mif:v0:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "explanation": "An explicit local policy blocks exact new boundary violations."
+      }
+    ],
+    "diagnostics": [],
+    "completeness": "complete"
+  },
+  "non_semantic_metadata": {
+    "run_id": "run-windows-001",
+    "generated_at": "2026-07-10T15:00:00Z",
+    "duration_ms": 842,
+    "host": {
+      "os_family": "windows",
+      "architecture": "x86_64",
+      "locale": "en-US",
+      "time_zone": "America/Chicago"
+    },
+    "machine_paths": {
+      "repository_root": "C:\\work\\acme-platform",
+      "cache_root": "C:\\Users\\example\\AppData\\Local\\project-cache"
+    },
+    "input_enumeration_order": [
+      "src\\ui\\refund-button.tsx",
+      "src\\payments\\refund-policy.ts"
+    ]
+  }
+}

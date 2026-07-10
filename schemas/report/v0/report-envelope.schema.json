@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.project-maintenance-delta.invalid/report/v0/report-envelope.schema.json",
+  "title": "Maintenance intelligence report envelope v0",
+  "description": "Lossless deterministic report content with explicitly isolated run-local metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "semantic"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "semantic": {
+      "$ref": "#/$defs/semantic_report"
+    },
+    "non_semantic_metadata": {
+      "$ref": "#/$defs/non_semantic_metadata"
+    }
+  },
+  "$defs": {
+    "stable_id": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/stable_id"
+    },
+    "semantic_version": {
+      "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/evidence.schema.json#/$defs/semantic_version"
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^mif:v0:[a-f0-9]{64}$"
+    },
+    "scan_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_id",
+        "repository_id",
+        "repository_object_database_id",
+        "base_revision",
+        "head_revision",
+        "configuration_digest",
+        "analyzers",
+        "external_snapshot_ids"
+      ],
+      "properties": {
+        "workspace_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "repository_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "repository_object_database_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "base_revision": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "head_revision": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "configuration_digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "analyzers": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9.-]*$",
+            "maxLength": 128
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/semantic_version"
+          },
+          "$comment": "Analyzer identity is a map so object member ordering cannot change semantic inputs."
+        },
+        "external_snapshot_ids": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9.-]*$",
+            "maxLength": 128
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/stable_id"
+          }
+        }
+      }
+    },
+    "policy_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_rule_id", "decision", "finding_fingerprints", "explanation"],
+      "properties": {
+        "policy_rule_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "decision": {
+          "enum": ["pass", "warn", "fail"]
+        },
+        "finding_fingerprints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/fingerprint"
+          }
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "decision": {
+                "const": "fail"
+              }
+            },
+            "required": ["decision"]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "finding_fingerprints": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "affects_completeness"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "severity": {
+          "enum": ["info", "warning", "error"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "analyzer_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$",
+          "maxLength": 128
+        },
+        "affects_completeness": {
+          "type": "boolean"
+        }
+      }
+    },
+    "semantic_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "Closed semantic content deliberately has no AI-generated or model-authoritative field.",
+      "required": [
+        "tool_version",
+        "scan_inputs",
+        "maintenance_delta",
+        "findings",
+        "policy_decisions",
+        "diagnostics",
+        "completeness"
+      ],
+      "properties": {
+        "tool_version": {
+          "$ref": "#/$defs/semantic_version"
+        },
+        "scan_inputs": {
+          "$ref": "#/$defs/scan_inputs"
+        },
+        "maintenance_delta": {
+          "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/maintenance-delta.schema.json"
+        },
+        "findings": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://schemas.project-maintenance-delta.invalid/report/v0/finding.schema.json"
+          },
+          "$comment": "Finding array order is a rendering concern and must be ignored by semantic comparisons."
+        },
+        "policy_decisions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/policy_decision"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        },
+        "completeness": {
+          "enum": ["complete", "partial", "failed"]
+        }
+      }
+    },
+    "host_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os_family", "architecture"],
+      "properties": {
+        "os_family": {
+          "enum": ["windows", "macos", "linux", "other"]
+        },
+        "architecture": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "locale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "time_zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "machine_paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository_root": { "type": "string", "maxLength": 4096 },
+        "cache_root": { "type": "string", "maxLength": 4096 },
+        "temporary_root": { "type": "string", "maxLength": 4096 }
+      }
+    },
+    "non_semantic_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "This entire object is excluded from fingerprints, policy, semantic equality, and cache keys. Writers should omit sensitive machine paths by default.",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "host": {
+          "$ref": "#/$defs/host_metadata"
+        },
+        "machine_paths": {
+          "$ref": "#/$defs/machine_paths"
+        },
+        "input_enumeration_order": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        }
+      }
+    }
+  }
+}

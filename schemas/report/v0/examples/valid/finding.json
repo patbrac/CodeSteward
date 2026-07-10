@@ -1,0 +1,104 @@
+{
+  "schema_version": "0.1.0",
+  "semantic": {
+    "fingerprint": "mif:v0:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fingerprint_basis": {
+      "namespace_version": "v0",
+      "rule_id": "architecture.boundary-violation",
+      "rule_major_version": 1,
+      "subject_ids": [
+        "module:payments-domain",
+        "module:user-interface"
+      ],
+      "relationship_ids": [
+        "relationship:payments-imports-ui"
+      ],
+      "parameters": [
+        { "name": "boundary_rule", "value": "deny-payments-ui" }
+      ]
+    },
+    "rule_id": "architecture.boundary-violation",
+    "rule_version": "1.0.0",
+    "state": "new",
+    "severity": "high",
+    "confidence": {
+      "score": 1,
+      "level": "exact",
+      "rationale": ["A resolved import exactly matches an explicit deny rule."]
+    },
+    "subject_ids": [
+      "module:payments-domain",
+      "module:user-interface"
+    ],
+    "summary": "A payments-domain import crosses a declared boundary.",
+    "explanation": "The resolved import from payments-domain to user-interface matches deny rule deny-payments-ui.",
+    "evidence": [
+      {
+        "schema_version": "0.1.0",
+        "semantic": {
+          "evidence_id": "evidence:boundary-rule-match-001",
+          "kind": "policy_rule",
+          "claim_support": "supports",
+          "subject_ids": [
+            "module:payments-domain",
+            "module:user-interface"
+          ],
+          "revision_context": {
+            "side": "head",
+            "revision_id": "git:2222222222222222222222222222222222222222",
+            "repository_id": "repository:acme-platform"
+          },
+          "provenance": {
+            "adapter_id": "typescript",
+            "adapter_version": "0.1.0",
+            "observation_ids": ["observation:import-edge-001"]
+          },
+          "basis": {
+            "type": "policy_rule",
+            "policy_rule_id": "deny-payments-ui",
+            "policy_rule_version": "1.0.0",
+            "matched_relationship_id": "relationship:payments-imports-ui"
+          },
+          "confidence": {
+            "score": 1,
+            "level": "exact",
+            "rationale": ["Both module membership and import resolution are exact."]
+          },
+          "limitations": []
+        }
+      }
+    ],
+    "evidence_completeness": "complete",
+    "limitations": [],
+    "suggested_actions": [
+      {
+        "action_id": "review-boundary-import",
+        "summary": "Remove the import or update the declared boundary through review.",
+        "verification": "Re-run the scan and confirm the exact boundary finding is resolved.",
+        "destructive": false
+      }
+    ],
+    "introduced_at_revision": "git:2222222222222222222222222222222222222222",
+    "baseline_revision": "git:1111111111111111111111111111111111111111",
+    "head_revision": "git:2222222222222222222222222222222222222222",
+    "block_eligibility": {
+      "status": "eligible_with_policy",
+      "reason_codes": [
+        "deterministic_evidence_complete",
+        "exact_policy_match"
+      ]
+    },
+    "suppression": null
+  },
+  "non_semantic_metadata": {
+    "finding_id": "run-20260710-finding-1",
+    "display_locations": [
+      {
+        "repository_relative_path": "src/payments/refund-policy.ts",
+        "line_start": 7,
+        "line_end": 7
+      }
+    ],
+    "render_order": 1
+  }
+}

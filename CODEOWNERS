@@ -1,0 +1,14 @@
+# CODEOWNERS requests review; branch protection determines whether it is required.
+# Update this file in the same pull request as MAINTAINERS.md role changes.
+
+*                                      @patbrac
+/.github/                               @patbrac
+/docs/adr/                              @patbrac
+/docs/rfc/                              @patbrac
+/docs/security/                         @patbrac
+/schemas/                               @patbrac
+/SECURITY.md                            @patbrac
+/GOVERNANCE.md                          @patbrac
+/MAINTAINERS.md                         @patbrac
+/LICENSE                               @patbrac
+/NOTICE                                @patbrac

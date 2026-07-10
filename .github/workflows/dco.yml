@@ -1,0 +1,39 @@
+name: DCO
+
+on:
+  # The target variant is intentional: GitHub loads this workflow from the
+  # protected base branch, so a pull request cannot replace its own DCO policy.
+  pull_request_target:
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    name: dco
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted DCO policy from the base commit
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: policy
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check out untrusted pull-request history without credentials
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/head
+          path: source
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify every contributed commit with the trusted checker
+        env:
+          DCO_BASE: ${{ github.event.pull_request.base.sha }}
+          DCO_HEAD: ${{ github.event.pull_request.head.sha }}
+        # Never execute or import a file from source/. The base-branch checker
+        # treats that checkout only as a Git object database.
+        run: python3 policy/scripts/ci/check_dco.py --repository source --base "$DCO_BASE" --head "$DCO_HEAD"

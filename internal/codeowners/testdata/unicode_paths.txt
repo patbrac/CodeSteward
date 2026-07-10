@@ -1,6 +1,0 @@
-# Unicode paths and an escaped space in a pattern.
-* @maintainers
-/café/ @cafe-team
-/src/naïve.ts @unicode-team
-/日本語/ @jp-team
-/src/my\ file.ts @spaced-team

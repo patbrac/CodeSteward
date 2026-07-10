@@ -1,14 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Documentation
-    url: https://github.com/codesteward-ai/codesteward/tree/main/docs
-    about: Read the getting-started guide, configuration reference, and troubleshooting docs before filing an issue.
-  - name: Troubleshooting guide
-    url: https://github.com/codesteward-ai/codesteward/blob/main/docs/troubleshooting.md
-    about: Fixes for shallow clones, missing tokens, missing CODEOWNERS, and duplicate comments.
-  - name: FAQ
-    url: https://github.com/codesteward-ai/codesteward/blob/main/docs/faq.md
-    about: Is this AI? Does it block merges? Where is the score? Answers to common questions.
-  - name: Security policy
-    url: https://github.com/codesteward-ai/codesteward/blob/main/SECURITY.md
-    about: Report security vulnerabilities privately here, not as public issues.
+  - name: Private vulnerability report
+    url: https://github.com/patbrac/CodeSteward/security/advisories/new
+    about: Do not disclose security details in a public issue.
