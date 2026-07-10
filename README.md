@@ -52,7 +52,7 @@ cargo run --locked -p steward-cli -- version
 
 These are bounded development commands: they build the finite workspace and run its checked-in test suites; they do not scan an arbitrary directory. `--locked` prevents an implicit lockfile update. If a dependency fetch is required, use Cargo's normal network access once, then repeat with `CARGO_NET_OFFLINE=true` (POSIX) or `$env:CARGO_NET_OFFLINE = "true"` (PowerShell) to check offline operation.
 
-For the complete format, lint, test, and documentation checks, see [CONTRIBUTING.md](CONTRIBUTING.md). Command behavior and exit codes are documented in the CLI help (`steward --help`) as commands stabilize.
+For the complete format, lint, test, and documentation checks, see [CONTRIBUTING.md](CONTRIBUTING.md). The current Phase 1 commands—`version`, `doctor`, and `config validate`—and their output and exit-code contracts are documented in the [CLI reference](docs/cli.md).
 
 ## Security and privacy
 
